@@ -12,16 +12,15 @@ s3 = boto3.client('s3')
 SNS_TOPIC_ARNS = [
     'arn:aws:sns:us-east-1:075381376422:cloudDishDailyStatsTopic',
     # Add more SNS topic ARNs here if needed
-    # 'arn:aws:sns:us-east-1:075381376422:anotherRecipientTopic'
 ]
 S3_BUCKET_NAME = 'clouddish-daily-reports'
 
 def lambda_handler(event, context):
-    # Step 1: Determine yesterday’s date
+    # Determine yesterday’s date
     today = datetime.date.today() - datetime.timedelta(days=1)
     formatted_date = today.strftime('%Y-%m-%d')
 
-    # Step 2: Scan the table and filter by date
+    # Scan the table and filter by date
     response = table.scan()
     items = response.get('Items', [])
 
@@ -32,23 +31,22 @@ def lambda_handler(event, context):
             name = item['dishName']
             stats[name] = stats.get(name, 0) + int(item.get('quantity', 1))
 
-    # Step 3: Generate report content
+    # Generate report content
     if stats:
         report_lines = [f"{dish}: {count} orders" for dish, count in stats.items()]
-        report = f"Daily stats for {formatted_date}:\n" + "\n".join(report_lines)
-
-        # Step 4: Send report to multiple SNS topics (only if stats exist)
-        for topic_arn in SNS_TOPIC_ARNS:
-            sns.publish(
-                TopicArn=topic_arn,
-                Subject=f"Daily CloudDish Stats for {formatted_date}",
-                Message=report
-            )
+        report = f"📊 Daily stats for {formatted_date}:\n" + "\n".join(report_lines)
     else:
-        report = f"No CloudDish orders were placed on {formatted_date}."
-        # ⛔️ No SNS emails will be sent
+        report = f"📊 Daily stats for {formatted_date}:\nNo CloudDish orders were placed."
 
-    # Step 5: Always upload report to S3
+    # Send report to SNS (always, even if empty)
+    for topic_arn in SNS_TOPIC_ARNS:
+        sns.publish(
+            TopicArn=topic_arn,
+            Subject=f"Daily CloudDish Stats for {formatted_date}",
+            Message=report
+        )
+
+    # Upload report to S3
     filename = f"cloudDishReport_{formatted_date}.txt"
     s3.put_object(
         Bucket=S3_BUCKET_NAME,
@@ -58,5 +56,5 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': f"Report {'emailed and ' if stats else ''}saved to S3 as {filename}"
+        'body': f"Report emailed and saved to S3 as {filename}"
     }
