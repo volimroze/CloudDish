@@ -79,4 +79,4 @@ See `Appendix A` and `Appendix B` in the project report.
 
 ## 👤 Authors
 - **Isidora Erakovic**
-- **Mattia Benatti**
+- **Mattia Benati**
