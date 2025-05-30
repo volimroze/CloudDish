@@ -30,7 +30,7 @@ CloudDish is a serverless application designed to help restaurants monitor daily
 
 ### ✅ 1. Clone the frontend code (or copy HTML files)
 ```bash
-git clone https://github.com/yourusername/clouddish-frontend.git
+git clone https://github.com/volimroze/CloudDish.git
 ```
 Upload to EC2 or host locally.
 
@@ -80,6 +80,3 @@ See `Appendix A` and `Appendix B` in the project report.
 ## 👤 Authors
 - **Isidora Erakovic**
 - **Mattia Benatti**
-
-## 📅 Submission Date
-31 May 2025
